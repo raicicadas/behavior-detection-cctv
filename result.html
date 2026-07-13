@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>판정 결과 · 아보카도 후숙 판단</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Pretendard", "-apple-system", "BlinkMacSystemFont", "Malgun Gothic", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="min-h-screen bg-stone-50">
+  <header class="flex items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),1rem)] pb-3">
+    <button
+      type="button"
+      onclick="window.location.href='index.html'"
+      aria-label="뒤로 가기"
+      class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-stone-600 active:bg-stone-200"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+    <h1 class="text-base font-semibold text-stone-900">판정 결과</h1>
+  </header>
+
+  <main class="px-5 pb-8 max-w-sm mx-auto">
+    <div class="aspect-square w-full overflow-hidden rounded-3xl bg-stone-200 shadow-sm ring-1 ring-stone-900/5">
+      <img id="resultImage" alt="촬영한 아보카도" class="h-full w-full object-cover" />
+    </div>
+
+    <div class="mt-6 flex flex-col items-center text-center">
+      <div id="statusIcon"></div>
+      <p id="statusHeadline" class="mt-2 text-2xl font-bold tracking-tight"></p>
+      <p id="statusNote" class="mt-1 text-sm text-stone-500"></p>
+    </div>
+
+    <div class="mt-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-900/5">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-medium text-stone-500">신뢰도</span>
+        <span id="confidenceValue" class="text-sm font-bold text-stone-900 tabular-nums"></span>
+      </div>
+      <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-stone-100">
+        <div id="confidenceBar" class="h-full rounded-full"></div>
+      </div>
+    </div>
+
+    <div id="lowConfidenceBanner" class="hidden mt-4 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="mt-0.5 shrink-0 text-amber-600" aria-hidden="true">
+        <path d="M12 3.5l9 16h-18l9-16z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+        <path d="M12 10v3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <circle cx="12" cy="16.2" r="0.9" fill="currentColor" />
+      </svg>
+      <p class="text-sm leading-relaxed text-amber-800">
+        신뢰도가 낮아요. 밝은 곳에서 아보카도 전체가 보이도록 다시 촬영하면 더 정확해요.
+      </p>
+    </div>
+
+    <label
+      for="retakeInput"
+      class="mt-8 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-4 text-base font-semibold text-white shadow-sm shadow-emerald-600/20 active:bg-emerald-700"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M4 8a2 2 0 012-2h1.5l1-1.5h7l1 1.5H18a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"
+          stroke="#fff" stroke-width="1.8" stroke-linejoin="round"
+        />
+        <circle cx="12" cy="12.5" r="3.2" stroke="#fff" stroke-width="1.8" />
+      </svg>
+      다시 촬영하기
+    </label>
+    <input id="retakeInput" type="file" accept="image/*" capture="environment" class="file-input-hidden" />
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const LOW_CONFIDENCE_THRESHOLD = 70;
+
+    const CHECK_ICON = `
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
+        <path d="M8 12.5l2.5 2.5L16 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>`;
+    const CLOCK_ICON = `
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
+        <path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>`;
+
+    function renderResult(entry) {
+      const isReady = entry.status === "ready";
+
+      document.getElementById("resultImage").src = entry.image;
+
+      const iconEl = document.getElementById("statusIcon");
+      iconEl.className = isReady ? "text-emerald-700" : "text-amber-700";
+      iconEl.innerHTML = isReady ? CHECK_ICON : CLOCK_ICON;
+
+      const headlineEl = document.getElementById("statusHeadline");
+      headlineEl.textContent = isReady ? "지금 바로 먹기 좋음" : `${entry.days}일 후숙 필요`;
+      headlineEl.className = `mt-2 text-2xl font-bold tracking-tight ${isReady ? "text-emerald-700" : "text-amber-700"}`;
+
+      document.getElementById("statusNote").textContent = isReady
+        ? ""
+        : "실온 보관 기준 예상 후숙 기간이에요";
+
+      document.getElementById("confidenceValue").textContent = `${entry.confidence}%`;
+      const bar = document.getElementById("confidenceBar");
+      bar.style.width = `${Math.min(100, Math.max(0, entry.confidence))}%`;
+      bar.className = `h-full rounded-full ${isReady ? "bg-emerald-500" : "bg-amber-500"}`;
+
+      document.getElementById("lowConfidenceBanner").classList.toggle(
+        "hidden",
+        entry.confidence >= LOW_CONFIDENCE_THRESHOLD
+      );
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const entry = getHistoryEntry(params.get("id"));
+    if (entry) {
+      renderResult(entry);
+    } else {
+      window.location.href = "index.html";
+    }
+
+    document.getElementById("retakeInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const dataUrl = await readFileAsDataURL(file);
+      const { stage, confidence } = await classifyImage(dataUrl);
+      const { status, days } = STAGE_COPY[stage];
+
+      const newEntry = {
+        id: `${Date.now()}`,
+        image: dataUrl,
+        capturedAt: new Date().toISOString(),
+        status,
+        days,
+        confidence,
+      };
+      saveHistoryEntry(newEntry);
+      window.location.href = `result.html?id=${newEntry.id}`;
+    });
+  </script>
+</body>
+</html>

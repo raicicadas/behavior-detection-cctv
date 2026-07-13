@@ -1,2 +1,10 @@
-# behavior-detection-cctv
-Real-time CCTV action recognition for detecting suspicious behavior.
+# 아보카도 후숙 판단 (Avocado Ripeness Checker)
+
+아보카도 사진을 찍으면 후숙 단계를 판별해 "지금 드세요" 또는 "N일 후숙 필요"를 알려주는 모바일 웹 앱 프로토타입입니다.
+
+- `index.html` — 홈 화면: 촬영 버튼 + 판정 이력 목록
+- `result.html` — 판정 결과 화면: 사진, 판정 문구, 신뢰도, 재촬영 버튼
+- `app.js` — 로컬 저장(localStorage) 및 후숙 단계 추론 로직
+- `style.css` — Tailwind(CDN)로 커버되지 않는 최소한의 커스텀 스타일
+
+`app.js`의 `classifyImage()`는 실제 후숙 판별 모델이 붙기 전까지 사진의 평균 밝기로 단계를 어림잡는 자리표시자입니다. 온디바이스 추론 모델 연동은 PRD상 별도 기술 설계 문서에서 다룹니다.

@@ -2,103 +2,153 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Behavior Detection CCTV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>아보카도 후숙 판단</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Pretendard", "-apple-system", "BlinkMacSystemFont", "Malgun Gothic", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header class="hero">
-    <nav class="navbar">
-      <div class="logo">
-        <span class="logo-dot"></span>
-        Behavior Detection CCTV
-      </div>
-      <ul class="nav-links">
-        <li><a href="#features">기능</a></li>
-        <li><a href="#how-it-works">동작 방식</a></li>
-        <li><a href="#contact">문의</a></li>
-      </ul>
-    </nav>
-
-    <div class="hero-content">
-      <span class="badge">Real-time AI Surveillance</span>
-      <h1>CCTV 영상 속<br />의심 행동을 실시간으로 감지합니다</h1>
-      <p class="hero-subtitle">
-        도난, 소매치기와 같은 이상 행동을 AI가 자동으로 인식하여
-        보안 담당자에게 즉시 알립니다.
-      </p>
-      <div class="hero-buttons">
-        <a href="#features" class="btn btn-primary">더 알아보기</a>
-        <a href="#contact" class="btn btn-outline">문의하기</a>
-      </div>
-    </div>
+<body class="min-h-screen bg-stone-50">
+  <header class="flex items-center gap-2 px-5 pt-[max(env(safe-area-inset-top),1.25rem)] pb-2">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3c3 3 6 6.5 6 11a6 6 0 11-12 0c0-4.5 3-8 6-11z" fill="#059669" opacity="0.9" />
+      <circle cx="12" cy="14.5" r="2.6" fill="#5b3a22" />
+    </svg>
+    <h1 class="text-lg font-bold text-stone-900">아보카도 후숙 판단</h1>
   </header>
 
-  <main>
-    <section id="features" class="section">
-      <h2 class="section-title">핵심 기능</h2>
-      <p class="section-subtitle">
-        실시간 행동 인식 기술로 매장과 시설의 안전을 지킵니다.
-      </p>
+  <main class="px-5 pb-10 max-w-md mx-auto">
+    <label
+      for="cameraInput"
+      class="mt-3 flex w-full cursor-pointer flex-col items-center gap-3 rounded-3xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-6 py-9 text-center shadow-lg shadow-emerald-600/25 active:from-emerald-600 active:to-emerald-700"
+    >
+      <span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/15">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M4 8a2 2 0 012-2h1.5l1-1.5h7l1 1.5H18a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"
+            stroke="#fff" stroke-width="1.8" stroke-linejoin="round"
+          />
+          <circle cx="12" cy="12.5" r="3.2" stroke="#fff" stroke-width="1.8" />
+        </svg>
+      </span>
+      <span class="text-lg font-bold text-white">사진 찍기</span>
+      <span class="text-sm text-emerald-50/90">아보카도를 촬영하고 바로 확인하세요</span>
+    </label>
+    <input
+      id="cameraInput"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      class="file-input-hidden"
+    />
 
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🎥</div>
-          <h3>실시간 영상 분석</h3>
-          <p>CCTV 스트림을 실시간으로 분석하여 지연 없이 이상 행동을 포착합니다.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🚨</div>
-          <h3>이상 행동 감지</h3>
-          <p>도난, 소매치기 등 사전에 정의된 의심 행동 패턴을 자동으로 탐지합니다.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔔</div>
-          <h3>즉시 알림</h3>
-          <p>이상 행동이 감지되면 담당자에게 즉시 알림을 전송하여 빠른 대응을 돕습니다.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>기록 및 통계</h3>
-          <p>감지된 이벤트를 자동으로 기록하고, 추후 분석을 위한 통계 자료를 제공합니다.</p>
-        </div>
-      </div>
-    </section>
+    <div class="mt-8 flex items-baseline justify-between">
+      <h2 class="text-sm font-semibold text-stone-900">최근 판정 이력</h2>
+      <span id="historyCount" class="text-xs text-stone-400 tabular-nums"></span>
+    </div>
 
-    <section id="how-it-works" class="section section-alt">
-      <h2 class="section-title">동작 방식</h2>
-      <p class="section-subtitle">간단한 3단계로 이상 행동을 감지합니다.</p>
+    <div id="historyEmpty" class="hidden mt-3 flex flex-col items-center rounded-2xl border border-dashed border-stone-300 px-6 py-10 text-center">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3c3 3 6 6.5 6 11a6 6 0 11-12 0c0-4.5 3-8 6-11z" fill="#059669" opacity="0.9" />
+        <circle cx="12" cy="14.5" r="2.6" fill="#5b3a22" />
+      </svg>
+      <p class="mt-3 text-sm font-medium text-stone-700">아직 촬영한 아보카도가 없어요</p>
+      <p class="mt-1 text-sm text-stone-400">위 버튼으로 첫 판정을 시작해보세요</p>
+    </div>
 
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>영상 입력</h3>
-          <p>기존 CCTV 카메라의 영상 스트림을 시스템에 연결합니다.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>행동 인식 모델</h3>
-          <p>AI 모델이 프레임 단위로 사람의 행동을 분석하고 패턴을 추출합니다.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>알림 및 대응</h3>
-          <p>의심 행동으로 판별되면 실시간 알림을 통해 즉각적인 대응이 가능합니다.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="section cta-section">
-      <h2 class="section-title">지금 시작해보세요</h2>
-      <p class="section-subtitle">
-        Behavior Detection CCTV로 매장과 시설의 보안을 한 단계 업그레이드하세요.
-      </p>
-      <a href="mailto:contact@example.com" class="btn btn-primary">문의하기</a>
-    </section>
+    <ul id="historyList" class="mt-3 flex flex-col gap-2.5"></ul>
   </main>
 
-  <footer class="footer">
-    <p>&copy; 2026 Behavior Detection CCTV. All rights reserved.</p>
-  </footer>
+  <script src="app.js"></script>
+  <script>
+    const cameraInput = document.getElementById("cameraInput");
+    const historyList = document.getElementById("historyList");
+    const historyEmpty = document.getElementById("historyEmpty");
+    const historyCount = document.getElementById("historyCount");
+
+    const CHIP_CLASSES = {
+      ready: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+      ripening: "bg-amber-50 text-amber-700 ring-amber-200",
+    };
+
+    function chipLabel(entry) {
+      return entry.status === "ready" ? "지금 드세요" : `${entry.days}일 후숙 필요`;
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      historyList.innerHTML = "";
+
+      if (history.length === 0) {
+        historyEmpty.classList.remove("hidden");
+        historyCount.textContent = "";
+        return;
+      }
+
+      historyEmpty.classList.add("hidden");
+      historyCount.textContent = `${history.length}개`;
+
+      for (const entry of history) {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <button
+            type="button"
+            data-id="${entry.id}"
+            class="history-item flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-stone-900/5 active:bg-stone-50"
+          >
+            <img src="${entry.image}" alt="" class="h-14 w-14 shrink-0 rounded-xl object-cover bg-stone-100" />
+            <div class="min-w-0 flex-1">
+              <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${CHIP_CLASSES[entry.status]}">
+                ${chipLabel(entry)}
+              </span>
+              <p class="mt-1.5 text-xs text-stone-400">${formatDate(entry.capturedAt)} · 신뢰도 ${entry.confidence}%</p>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 5l7 7-7 7" stroke="#d6d3d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        `;
+        historyList.appendChild(li);
+      }
+
+      historyList.querySelectorAll(".history-item").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          window.location.href = `result.html?id=${btn.dataset.id}`;
+        });
+      });
+    }
+
+    cameraInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const dataUrl = await readFileAsDataURL(file);
+      const { stage, confidence } = await classifyImage(dataUrl);
+      const { status, days } = STAGE_COPY[stage];
+
+      const entry = {
+        id: `${Date.now()}`,
+        image: dataUrl,
+        capturedAt: new Date().toISOString(),
+        status,
+        days,
+        confidence,
+      };
+      saveHistoryEntry(entry);
+      window.location.href = `result.html?id=${entry.id}`;
+    });
+
+    renderHistory();
+  </script>
 </body>
 </html>
