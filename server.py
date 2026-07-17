@@ -7,6 +7,7 @@ import psycopg2
 from flask import Flask, jsonify, request, send_from_directory
 from google.cloud import aiplatform
 from google.cloud.aiplatform.gapic.schema import predict
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # Render only supports plain env vars, not mounted secret files, so the GCP
 # credentials JSON travels as a string in GOOGLE_APPLICATION_CREDENTIALS_JSON
@@ -87,22 +88,68 @@ def index():
     return send_from_directory(".", "index.html")
 
 
-@app.route("/api/login", methods=["POST"])
-def login():
-    email = (request.get_json(silent=True) or {}).get("email", "").strip().lower()
-    if not email:
-        return jsonify({"error": "email is required"}), 400
+@app.route("/api/signup", methods=["POST"])
+def signup():
+    data = request.get_json(silent=True) or {}
+    email = data.get("email", "").strip().lower()
+    name = data.get("name", "").strip()
+    password = data.get("password", "")
+
+    if not email or not password:
+        return jsonify({"error": "email and password are required"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "password must be at least 6 characters"}), 400
+
+    password_hash = generate_password_hash(password)
 
     conn = psycopg2.connect(DATABASE_URL)
     try:
         cur = conn.cursor()
+        cur.execute("SELECT id, password_hash FROM users WHERE lower(email) = %s", (email,))
+        existing = cur.fetchone()
+
+        if existing and existing[1] is not None:
+            return jsonify({"error": "an account with that email already exists"}), 409
+
+        if existing:
+            # Claim a pre-seeded row (email/name only, no password yet).
+            cur.execute(
+                "UPDATE users SET password_hash = %s, name = COALESCE(NULLIF(%s, ''), name) WHERE id = %s",
+                (password_hash, name, existing[0]),
+            )
+        else:
+            cur.execute(
+                "INSERT INTO users (email, name, password_hash) VALUES (%s, %s, %s)",
+                (email, name, password_hash),
+            )
+
         cur.execute("SELECT name FROM users WHERE lower(email) = %s", (email,))
+        final_name = cur.fetchone()[0]
+        conn.commit()
+    finally:
+        conn.close()
+
+    return jsonify({"email": email, "name": final_name})
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.get_json(silent=True) or {}
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+    if not email or not password:
+        return jsonify({"error": "email and password are required"}), 400
+
+    conn = psycopg2.connect(DATABASE_URL)
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT name, password_hash FROM users WHERE lower(email) = %s", (email,))
         row = cur.fetchone()
     finally:
         conn.close()
 
-    if row is None:
-        return jsonify({"error": "no account with that email"}), 404
+    if row is None or row[1] is None or not check_password_hash(row[1], password):
+        return jsonify({"error": "invalid email or password"}), 401
     return jsonify({"email": email, "name": row[0]})
 
 
